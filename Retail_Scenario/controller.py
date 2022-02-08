@@ -147,19 +147,19 @@ def read_products():
         baseQuery = "select Ratings, Type, PRODUCT_PRICE, Product_Name from products "
         if input['Ratings']:
             if x:
-                baseQuery = baseQuery + f" where Ratings = '{input['Ratings']}'" 
+                baseQuery = baseQuery + f" where Ratings = '{input['Ratings']}' ORDER BY PRODUCT_PRICE " 
                 x = False
             else:
                 baseQuery = baseQuery + f" and where Ratings = '{input['Ratings']}'"
         if input['Type']:
             if x:
-                baseQuery = baseQuery + f" where Type = '{input['Type']}'" 
+                baseQuery = baseQuery + f" where Type = '{input['Type']}'  ORDER BY PRODUCT_PRICE" 
                 x = False
             else:
                 baseQuery = baseQuery + f" and  Type = '{input['Type']}'"
         if input['PRODUCT_PRICE']:
             if x:
-                baseQuery = baseQuery + f" where PRODUCT_PRICE = '{input['PRODUCT_PRICE']}'" 
+                baseQuery = baseQuery + f" where PRODUCT_PRICE = '{input['PRODUCT_PRICE']}'  ORDER BY PRODUCT_PRICE" 
                 x = False
             else:
                 baseQuery = baseQuery + f" and  PRODUCT_PRICE = '{input['PRODUCT_PRICE']}'"
