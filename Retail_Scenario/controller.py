@@ -140,10 +140,45 @@ def read_products():
         start_time = datetime.now()
         input = {}
         input = request.get_json()
-        query = f"select Ratings, Type, PRODUCT_PRICE, Product_Name from products where Ratings = IFNULL(null,'{input['Ratings']}') and Type = IFNULL(null,'{input['Type']}') and PRODUCT_PRICE = IFNULL(null,'{input['PRODUCT_PRICE']}') or Product_Name = IFNULL(null,'{input['Product_Name']}') ;"
+
+
+
+        x = True
+        baseQuery = "select Ratings, Type, PRODUCT_PRICE, Product_Name from products "
+        if input['Ratings']:
+            if x:
+                baseQuery = baseQuery + f" where Ratings = '{input['Ratings']}'" 
+                x = False
+            else:
+                baseQuery = baseQuery + f" and where Ratings = '{input['Ratings']}'"
+        if input['Type']:
+            if x:
+                baseQuery = baseQuery + f" where Type = '{input['Type']}'" 
+                x = False
+            else:
+                baseQuery = baseQuery + f" and  Type = '{input['Type']}'"
+        if input['PRODUCT_PRICE']:
+            if x:
+                baseQuery = baseQuery + f" where PRODUCT_PRICE = '{input['PRODUCT_PRICE']}'" 
+                x = False
+            else:
+                baseQuery = baseQuery + f" and  PRODUCT_PRICE = '{input['PRODUCT_PRICE']}'"
+        if input['Product_Name']:
+            if x:
+                baseQuery = baseQuery + f" where Product_Name = '{input['Product_Name']}'"
+                x = False
+            else:
+                baseQuery = baseQuery + f" and  Product_Name = '{input['Product_Name']}'"
+        if input['limit']:
+                baseQuery = baseQuery + f" limit {input['limit']}"
+                if input['offset']:
+                    baseQuery = baseQuery + f" offset {input['offset']}"
+
+        baseQuery = baseQuery + ";"
+        #query = f"select Ratings, Type, PRODUCT_PRICE, Product_Name from products where Ratings = IFNULL(null,'{input['Ratings']}') and Type = IFNULL(null,'{input['Type']}') and PRODUCT_PRICE = IFNULL(null,'{input['PRODUCT_PRICE']}') or Product_Name = IFNULL(null,'{input['Product_Name']}') ;"
         # query = f"select Ratings, Type, PRODUCT_PRICE, Product_Name from products where (Ratings='{input['details']}' OR '{input['details']}' IS NULL) and (Type='{input['details2']}' OR '{input['details2']}' IS NULL);"
-        print(query)
-        var = db.get_all(query)
+        print(baseQuery)
+        var = db.get_all(baseQuery)
         return jsonify(give_response(data=var, message='operation successful', start_time=start_time))
 
 
