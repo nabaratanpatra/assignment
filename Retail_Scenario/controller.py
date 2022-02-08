@@ -1,4 +1,3 @@
-
 from Retail_Scenario.validation import validation_check, validation_insert, validation_insert_id, validation_update
 from Utilities import db
 from flask import jsonify,request
@@ -51,7 +50,7 @@ def check_employee():
     print("checking")
     Customer_Email = test_authorization()
     print(Customer_Email)
-    query = "select Customer_Email from customers where Customer_Email = '%s';"%(input[Customer_Email])
+    query = f"select Customer_Email from customers where Customer_Email = '{input[Customer_Email]}';"
     print(query)
     output = db.get_all(query)
     print("USER IS PRESENT")
@@ -69,7 +68,7 @@ def retail_login():
     if isinstance(v,bool):
             query = f"select password from customers where Customer_Email = '{input['Customer_Email']}'"
             messages = db.get_all(query)
-            print("------------")
+            #  print("------------")
             if give_hash(input['Password']) == messages[0][0]:
                 print("HELLO")
                 access_token = create_access_token(identity=input['Customer_Email'])
@@ -80,46 +79,28 @@ def retail_login():
         return jsonify({ "message" : v })
 
 
-def order_details():
-        start_time = datetime.now()
-        auth = str(request.headers['Authorization']).split(' ')[1]
-        output= decode_token(auth)['sub']
-        query = f"select c.Customer_Name,c.Contact,c.Gender,c.Address,p.Product_Name, p.Product_Model,p.Availability,p.Ratings,p.Type from Customers c left join Customer_Orders co on c.Customer_ID = co.Customer_ID left join Products p on co.Product_ID = p.Product_ID where c.Customer_Email = '%s';"%(output)
-        var = db.get_all_id(query)
-        return jsonify(give_response(data=var, message='operation successful', start_time=start_time))
-        # else:
-        #     return jsonify(give_response(data=[], message='operation falied', start_time=start_time))
-
-
-def update_order():
-    start_time = datetime.now()
-    if isinstance(check_employee(),bool):
-        input = {}
-        input = request.get_json()
-        v= validation_update(input)
-        if isinstance(v,bool):
-            query = "UPDATE Customer_Orders SET Quantity = '%s' WHERE Customer_ID = %s;"%(input["Quantity"],input["Customer_ID"])
-            messages = db.update(query)
-            return jsonify(give_response(data=messages, message="row is updated", start_time=start_time))
-        else:
-            return jsonify({ "message" : v })
-    else:
-        return jsonify(give_response(data=[], message="operation falied", start_time=start_time))
-
-
 
 def place_order():
     start_time = datetime.now()
     auth = str(request.headers['Authorization']).split(' ')[1]
     input= decode_token(auth)['sub']
-    v= validation_update(input)
+    print(input)
+    value = request.args
+    v= validation_insert_id(value)
+    inputs = {}
+    inputs = request.get_json()
+    print(v)
     if isinstance(v,bool):
-        input = {}
-        input = request.get_json()
-        query = f"insert into Customer_Orders('Customer_ID','Product_ID','Quantity') values ('{input['Customer_ID']}','{input['Product_ID']}','{input['Quantity']}');"
-        print(query)
-        messages = db.update(query)
-        return jsonify(give_response(data=messages, message="row is updated", start_time=start_time))
+        query = f"select Customer_ID from Customers where Customer_Email = '{input}'"
+        messages = db.get_all(query)
+        print(messages[0][0])
+        query1 = f"insert into Customer_Orders(Customer_ID,Product_ID,Quantity) values ('{messages[0][0]}', {inputs['Product_ID']} , {inputs['Quantity']});"
+        print(query1)
+        messages1 = db.update(query1)
+        print(messages1)
+        query3 = f"update Products set Availability = Availability - {inputs['Quantity']} where Product_ID = '{inputs['Product_ID']}';"
+        messages3 = db.update(query3)
+        return jsonify(give_response(data=messages3, message="row is updated", start_time=start_time))
     else:
         return jsonify(give_response(data=[], message="operation falied", start_time=start_time))
 
@@ -138,26 +119,41 @@ def delete_order():
     print(v)
     if isinstance(v,bool):
         print("---------------")
-        query1 = "select Quantity from Customer_Orders where Product_ID  = %s;"%(inputs["Product_ID"])
+        query = f"select Customer_ID from Customers where Customer_Email = '{input}'"
+        messages = db.get_all(query)
+        print(messages[0][0])
+        query1 =f"select Quantity from Customer_Orders where Customer_ID = '{messages[0][0]}' and Product_ID  = {inputs['Product_ID']};"
+        print(query1)
         messages1 = db.get_all(query1)
-        print(messages1)
-        query = "DELETE FROM Customer_Orders WHERE Product_ID  = %s;"%(inputs["Product_ID"])
-        messages = db.delete(query)
-        print(messages)
-        query2 = "update Products set Availability = Availability + 'message1' where Product_ID = ;"%(inputs["Product_ID"])
-        messages2 = db.update(query2)
-        return jsonify(give_response(data=messages2, message="Deleted the data", start_time=start_time))
+        print(messages1[0][0])
+        query2 = f"DELETE FROM Customer_Orders WHERE Product_ID  = '{inputs['Product_ID']}';"
+        messages2 = db.delete(query2)
+        print(messages2)
+        query3 = f"update Products set Availability = Availability + '{messages1[0][0]}' where Product_ID = '{inputs['Product_ID']}';"
+        messages3 = db.update(query3)
+        return jsonify(give_response(data=messages3, message="Deleted the data", start_time=start_time))
     else:
         return jsonify({ "message" : v })
-
-
-
 
 
 def read_products():
         start_time = datetime.now()
         input = {}
         input = request.get_json()
-        query = f"select Ratings, Type, PRODUCT_PRICE, Product_Name from products where {input['col']} = '{input['details']}';"
+        query = f"select Ratings, Type, PRODUCT_PRICE, Product_Name from products where Ratings = IFNULL(null,'{input['Ratings']}') and Type = IFNULL(null,'{input['Type']}') and PRODUCT_PRICE = IFNULL(null,'{input['PRODUCT_PRICE']}') or Product_Name = IFNULL(null,'{input['Product_Name']}') ;"
+        # query = f"select Ratings, Type, PRODUCT_PRICE, Product_Name from products where (Ratings='{input['details']}' OR '{input['details']}' IS NULL) and (Type='{input['details2']}' OR '{input['details2']}' IS NULL);"
+        print(query)
         var = db.get_all(query)
         return jsonify(give_response(data=var, message='operation successful', start_time=start_time))
+
+
+def order_details():
+        start_time = datetime.now()
+        auth = str(request.headers['Authorization']).split(' ')[1]
+        output= decode_token(auth)['sub']
+        query = f"select c.Customer_Name, c.Contact,c.Gender,c.Address,p.Product_Name, p.Product_Model,p.Availability,p.Ratings,p.Type from Customers c left join Customer_Orders co on c.Customer_ID = co.Customer_ID left join Products p on co.Product_ID = p.Product_ID where c.Customer_Email = '{output}';"
+        var = db.get_all_id(query)
+        print(var)
+        # for row in var:
+        #     print "%s, %s" % (row["name"], row["category"])
+        return jsonify(give_response(data=[var], message='operation successful', start_time=start_time))

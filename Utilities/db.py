@@ -67,7 +67,6 @@ def delete(query):
 def get_all(query):
     try:
             conn = connect()
-            print(conn)
             cursor = conn.cursor()
             cursor.execute(query)
             msg = cursor.fetchall()
