@@ -64,14 +64,14 @@ def delete(query):
         return msg     
 
 
-def get_all(query):
+def get_all(query, inputarray):
     try:
             conn = connect()
             cursor = conn.cursor()
-            cursor.execute(query)
+            cursor.execute(query, inputarray)
             msg = cursor.fetchall()
             conn.commit()
-            conn.close() 
+            conn.close()
             return msg
     except Exception as e:
         return error_handler.generate_error_response(e) 

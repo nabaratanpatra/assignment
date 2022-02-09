@@ -32,6 +32,7 @@ def handle_exception(e):
             }
         return jsonify(response)
     else:
+        print(e)
         response = {
             "success":False,
             "data": [],

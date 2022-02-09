@@ -4,37 +4,55 @@ from cerberus import Validator
 def validation_insert(body):
    v = Validator()
    v.schema = {
-         'id': { 
-            'type': 'integer',
-            'minlength': 1
+         'Ratings': { 
+            'type': 'string'
                      },
-         'first_name': { 
-            'type': 'string',
-            'minlength': 2
+         'Type': { 
+            'type': 'string'
                      },
-         'last_name': { 
-            'type': 'string',
-            'minlength': 2
-                     },
-         "email": {
-            "type": "string",
-            "minlength": 8,
-            "maxlength": 255,
-            "regex": "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$"
+         'PRODUCT_PRICE': {
+            'type': 'string'
                   },
-         'gender': {
-            'type': 'string',
-                   },
-         "phone": {
-            "type": "string",
-            "minlength": 10,
-            "maxlength": 11,
-            "regex": "^0[0-9]{9}$"
+         "Product_Name": {
+            "type": "string"
                   },
-         "password": {
-            "type": "string",
-            "minlength": 8,
-            "maxlength": 50
+         "limit": {
+            "type": "integer"
+                  },
+         "offset": {
+            "type": "integer"
+                  }
+            }
+   
+   val= v.validate(body)
+   if val:
+      return True
+   else:
+      print(v.errors)
+      return v.errors
+
+
+
+def validation_read(body):
+   v = Validator()
+   v.schema = {
+         'Ratings': { 
+            'type': 'string'
+                     },
+         'Type': { 
+            'type': 'string'
+                     },
+         'PRODUCT_PRICE': {
+            'type': 'integer'
+                  },
+         "Product_Name": {
+            "type": "string"
+                  },
+         "COLUMN": {
+            "type": "integer"
+                  },
+         "PAGE": {
+            "type": "integer"
                   }
             }
    
@@ -43,6 +61,9 @@ def validation_insert(body):
       return True
    else:
       return v.errors
+
+
+
 
 
 def validation_update(body):
