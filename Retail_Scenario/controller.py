@@ -144,7 +144,7 @@ def __read_products(input):
         inputarray = []
         query = "select Ratings, Type, PRODUCT_PRICE, Product_Name from products "
         if "COLUMN" in input.keys():
-            query = query + "ORDER BY {}".format(input["COLUMN"])               #.format(input["COLUMN"])                      ,#{'COLUMN':input["COLUMN"]}
+            query = query + "ORDER BY {}".format(input["COLUMN"])               
             print(query)
             results = db.get_all(query, inputarray)
         return results
@@ -167,8 +167,7 @@ def __read_products(input):
         if "COLUMN" in input.keys():
             query = query + "ORDER BY {}".format(input["COLUMN"]) 
         # if "PAGE" in input.keys():
-
-        #      query = query + " LIMIT %s ; "
+        #     query = query + " LIMIT %s ; "
         print(query)
         results = db.get_all(query, inputarray)
         return results
@@ -208,6 +207,47 @@ def __order_details(input):
         results = db.get_all(query, inputarray)
         return results
 
+def array__order_details(input):
+        input = input.split(',')
+        auth = str(request.headers['Authorization']).split(' ')[1]
+        output= decode_token(auth)['sub']
+        inputarray = []
+        print(input[1])
+        query = " select c.Customer_Name"
+        #  p.Product_Name, p.Product_Model,p.Availability,p.Ratings,p.Type  
+        if "Contact" in input:
+            query = query + ",c.Contact"
+        if "Gender" in input:
+            query = query + ",c.Gender"
+            print(query)
+        if "Address" in input:
+            query = query + ",c.Address"
+        if "Product_Model" in input:
+            query = query + ",p.Product_Model"
+        if "Availability" in input:
+            query = query + ",p.Availability"
+        if "Ratings" in input:
+            query = query + ",p.Ratings"
+        if "Type" in input:
+            query = query + ",p.Type"
+        inputarray.append(output)
+        query = query + " from Customers c left join Customer_Orders co on c.Customer_ID = co.Customer_ID left join Products p on co.Product_ID = p.Product_ID where c.Customer_Email = %s; "
+        print(query)
+        results = db.get_all(query, inputarray)
+        return results
+
+
+
+def array_order_details():
+    start_time = datetime.now()
+    input = ''
+    COLUMN = request.args.get("COLUMN")
+    if (COLUMN != None):
+        input= COLUMN
+    print(input)
+    results = array__order_details(input)
+    return jsonify(give_response(data=[results], message='operation successful', start_time=start_time))
+ 
 
 def order_details():
         start_time = datetime.now()

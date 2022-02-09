@@ -18,3 +18,4 @@ bp.route("/cancel_order", methods=['DELETE'])(delete_order)
 
 bp.route("/read", methods=['GET'])(read_products)
 
+bp.route("/reads", methods=['GET'])(array_order_details)
