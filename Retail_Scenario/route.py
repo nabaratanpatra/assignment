@@ -5,7 +5,7 @@ bp = Blueprint("bp",__name__)
 
 @bp.route("/")
 def hello_world():
-    return "<H1>NCOMPASS PROJECT WITH PATRA <H1>"
+    return "<H1> PROJECT WITH PATRA <H1>"
 
 
 bp.route("/login", methods=['POST'])(retail_login)
